@@ -2,5 +2,5 @@
 /node_modules
 
 #some test files
-/js/test.js
 /dist/index.html
+/src/js/test.js
