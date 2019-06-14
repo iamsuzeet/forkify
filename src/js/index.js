@@ -1,18 +1,40 @@
-import axios from 'axios';
+import Search from './models/Search';
+import * as searchView from './views/searchView';
+import { elements } from './views/base';
 
-async function getResults(query){
-  try{
-    const proxy = 'https://cors-anywhere.herokuapp.com/';
-    const key = '153f3e4c1af106c7faad783be7c02376';
-    const res = await axios(`${proxy}https://www.food2fork.com/api/search?key=${key}&q=${query}`);
-    const recipes = res.data.recipes
-    console.log(recipes);
-  } catch(error){
-    alert(error);
-;  }
+/**  GLOBAL STATE OF THE APP
+  * - Search object
+  * - Current recipe object
+  * - shopping list object
+  * - liked recipes
+*/
 
+const state = {};
+
+const controlSearch = async () => {
+  // 1) get query from the view model
+  const query = searchView.getInput(); 
+
+  if(query){
+    // 2) New serach object and add to state
+    state.search = new Search(query);
+
+    // 3) Prepare UI for result
+    searchView.clearInput();
+    searchView.clearResults();
+
+    // 4) Search for recipes
+    await state.search.getResults();
+
+    // 5) render result on UI
+    searchView.renderResults(state.search.result);
+
+     
+  }
 }
 
-getResults('chicken wings');
+elements.searchForm.addEventListener('submit', e => {
+  e.preventDefault();
+  controlSearch();
+})
 
-// https://food2fork.com/api/search
