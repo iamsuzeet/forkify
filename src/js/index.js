@@ -19,11 +19,13 @@ const state = {};
 */
 const controlSearch = async () => {
   // 1) get query from the view model
-  const query = searchView.getInput(); 
+  const query = searchView.getInput();
+  
 
   if(query){
     // 2) New serach object and add to state
     state.search = new Search(query);
+    
 
     // 3) Prepare UI for result
     searchView.clearInput();
@@ -33,6 +35,7 @@ const controlSearch = async () => {
     try{
       // 4) Search for recipes
       await state.search.getResults();
+      state.recipe.parseIngredients();
 
       // 5) render result on UI
       clearLoader();
@@ -50,6 +53,8 @@ elements.searchForm.addEventListener('submit', e => {
   controlSearch();
 });
 
+
+
 elements.searchResPages.addEventListener('click', e =>{
     const btn = e.target.closest('.btn-inline');
     if(btn){
@@ -61,7 +66,7 @@ elements.searchResPages.addEventListener('click', e =>{
 })
 
 /**
- * recipe controller
+ * Recipe controller
  */
 const controlRecipe = async () => {
   //get the id from the url
@@ -73,14 +78,18 @@ const controlRecipe = async () => {
 
     //create new recipe object
     state.recipe = new Recipe(id);
+    
+   
 
     try{
-      //get recipe data
+      //get recipe data and parse ingredient
       await state.recipe.getRecipe();
+      // console.log(state.recipe.ingredients);
+      state.recipe.parseIngredients();
 
-     //calc tme and servings
+     //calc time and servings
      state.recipe.calcTime();
-      state.recipe.calcServings();
+     state.recipe.calcServings();
 
       //render the recipe
       console.log(state.recipe);
