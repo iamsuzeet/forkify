@@ -1,6 +1,7 @@
 import Search from './models/Search';
 import Recipe from './models/Recipe';
 import * as searchView from './views/searchView';
+import * as recipeView from './views/recipeView';
 import { elements, renderLoader, clearLoader } from './views/base';
 
 /**  GLOBAL STATE OF THE APP
@@ -35,7 +36,7 @@ const controlSearch = async () => {
     try{
       // 4) Search for recipes
       await state.search.getResults();
-      state.recipe.parseIngredients();
+      
 
       // 5) render result on UI
       clearLoader();
@@ -74,13 +75,19 @@ const controlRecipe = async () => {
   // console.log(id);
 
   if(id){
+    //clear recipe
+    recipeView.clearRecipe();
     //prepare UI for changes
+    renderLoader(elements.recipe);
+
+    //highlight selected search item
+    if(state.search)searchView.highLightSelected(id);
 
     //create new recipe object
     state.recipe = new Recipe(id);
     
    
-
+    
     try{
       //get recipe data and parse ingredient
       await state.recipe.getRecipe();
@@ -92,7 +99,9 @@ const controlRecipe = async () => {
      state.recipe.calcServings();
 
       //render the recipe
-      console.log(state.recipe);
+      // console.log(state.recipe);
+      clearLoader();
+      recipeView.renderRecipe(state.recipe);
     } catch(err){
       alert('Error processing recipe');
     }
@@ -103,3 +112,21 @@ const controlRecipe = async () => {
 // window.addEventListener('hashchange', controlRecipe);
 // window.addEventListener('load', controlRecipe);
 ['hashchange','load'].forEach(event => window.addEventListener(event, controlRecipe));
+
+
+//handling recipe button clicks
+elements.recipe.addEventListener('click', e => {
+  if(e.target.matches('.btn-decrease , .btn-decrease *')){
+    // decrease button is clicked
+    if(state.recipe.servings > 1){
+    state.recipe.updateServings('dec');
+    recipeView.updateServingsIngredients(state.recipe);
+    }
+  } else if(e.target.matches('.btn-increase , .btn-increase *')){
+    // increase button is clicked
+    state.recipe.updateServings('inc');
+    recipeView.updateServingsIngredients(state.recipe);
+  }
+  console.log(state.recipe);
+
+})
